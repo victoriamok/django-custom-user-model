@@ -1,14 +1,20 @@
 from django.contrib.auth import (
     authenticate,
-    get_user_model,
     login,
     logout,
 
 )
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
-from .forms import CustomUserCreationForm, CustomUserChangeForm, UserAuthenticationForm
+from .forms import (
+    CustomUserCreationForm,
+    CustomUserChangeForm,
+    UserAuthenticationForm,
+    RemoveUser,
+    UserAccountUpdateForm,
+)
 
 
 # class SignUpView(CreateView):
@@ -27,8 +33,6 @@ def registration_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            first_name = form.cleaned_data.get('first_name')
-            last_name = form.cleaned_data.get('last_name')
             password = form.cleaned_data.get('password2')
             user.set_password(password)
             user.save()
@@ -40,30 +44,73 @@ def registration_view(request):
     return render(request, 'signup.html', {'form': form})
 
 
-def logout_view(response):
-    logout(response)
+@login_required
+def account_view(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    context = {}
+    if request.method == 'POST':
+        form = UserAccountUpdateForm(request.POST or None, instance=request.user)
+        if form.is_valid():
+            form.initial = {
+                "email": request.POST.get('email'),
+                "first_name": request.POST.get('first_name'),
+                "last_name": request.POST.get('last_name'),
+            }
+            form.save()
+            context['success_message'] = "Updated"
+    else:
+        form = UserAccountUpdateForm(
+            initial={
+                "email": request.user.email,
+                "first_name": request.user.first_name,
+                "last_name": request.user.last_name,
+            }
+        )
+
+    context['account_form'] = form
+
+    return render(request, "account.html", context)
+
+
+def logout_view(request):
+    logout(request)
     return redirect('home')
 
 
-def login_view(response):
-    user = response.user
+def login_view(request):
+    user = request.user
     if user.is_authenticated:
         return redirect('home')
 
-    if response.method == 'POST':
-        form = UserAuthenticationForm(response.POST)
+    if request.method == 'POST':
+        form = UserAuthenticationForm(request.POST)
         if form.is_valid():
-            email = response.POST['email']
-            password = response.POST['password']
+            email = request.POST['email']
+            password = request.POST['password']
             user = authenticate(
                 email=email,
                 password=password
             )
-
             if user:
-                login(response, user)
+                login(request, user)
                 return redirect('home')
     else:
         form = UserAuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
 
-    return render(response, 'registration/login.html', {'form': form})
+
+@login_required
+def remove_user_view(request):
+    if request.method == 'POST':
+        form = RemoveUser(request.POST)
+        if form.is_valid():
+            user = request.user
+            if user is not None:
+                user.delete()
+                messages.success(request, 'Profile successfully deleted.')
+                return redirect('home')
+    else:
+        form = RemoveUser()
+    return render(request, 'delete_account.html', {'form': form})

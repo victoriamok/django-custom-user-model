@@ -1,11 +1,11 @@
 from django.conf.urls import url
-from django.urls import path, include
 
 from users.api.views import (
     UserCreateAPIView,
     UserLoginAPIView,
+    ChangePasswordView,
     #   CreateUserView
-    ChangePasswordView)
+)
 
 urlpatterns = [
     url(r'^login/$', UserLoginAPIView.as_view(), name='login'),

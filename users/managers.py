@@ -8,16 +8,10 @@ class CustomUserManager(BaseUserManager):
     for authentication instead of usernames.
     """
 
-    def create_user(self, first_name, last_name, email, password=None, **extra_fields):
+    def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('You must enter an email')
-        if not first_name:
-            raise ValueError('You must enter your name')
-        if not last_name:
-            raise ValueError('You must enter your surname')
         user = self.model(email=self.normalize_email(email),
-                          first_name=first_name,
-                          last_name=last_name,
                           **extra_fields)
 
         user.set_password(password)
@@ -34,3 +28,4 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError(_('Superuser must have is_superuser=True.'))
         return self.create_user(email, password, **extra_fields)
+

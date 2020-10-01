@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth import authenticate
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, ReadOnlyPasswordHashField
+from django.forms import ModelForm
 
 from .models import CustomUser
 
@@ -30,7 +32,40 @@ class UserAuthenticationForm(forms.ModelForm):
             raise forms.ValidationError("Invalid login")
 
 
+class UserAccountUpdateForm(UserChangeForm):
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'first_name', 'last_name')
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        try:
+            account = CustomUser.objects.exclude(pk=self.instance.pk).get(email=email)
+        except ObjectDoesNotExist:
+            return email
+        raise forms.ValidationError('Email "%s" is already in use.' % account)
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data['first_name']
+        try:
+            CustomUser.objects.exclude(pk=self.instance.pk).get(first_name=first_name)
+        except ObjectDoesNotExist:
+            return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data['first_name']
+        try:
+            CustomUser.objects.exclude(pk=self.instance.pk).get(last_name=last_name)
+        except ObjectDoesNotExist:
+            return last_name
+
+
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
         fields = ('email', 'password')
+
+
+class RemoveUser(forms.Form):
+    email = forms.CharField()
+

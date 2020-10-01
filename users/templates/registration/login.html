@@ -52,6 +52,10 @@
       <p>{{login_form.non_field_errors}}</p>
     </div>
   {% endif %}
-  <button type="submit">Login</button>
+  <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
 </form>
+
+<div class="d-flex flex-column">
+  <a class="m-auto" href="{% url 'password_reset' %}"> Forgot password? </a>
+</div>
 {% endblock %}

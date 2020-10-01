@@ -5,8 +5,9 @@
 
 {% block content %}
 {% if user.is_authenticated %}
+
   Hi {{ user.first_name }}!
-<!--  <p><a href="{% url 'logout' %}">logout</a></p>-->
+
 {% else %}
   <p>  <a href="{% url 'home' %}">HOME </a>
     | <a href="{% url 'login' %}">LOGIN</a> | <a href="{% url 'signup' %}">SIGN UP</a> </p>

@@ -14,7 +14,7 @@ RUN apk add --no-cache postgresql-libs && \
     apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev && \
     apk add --update --no-cache --virtual .tmp gcc libc-dev linux-headers && \
     pip install -r requirements.txt && \
-    apk del .build-deps && apk del .tmp && \
+    apk del .build-deps && apk del .tmp
 
 COPY . /app/
 

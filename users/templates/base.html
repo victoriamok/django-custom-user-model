@@ -5,7 +5,11 @@
   <meta charset="utf-8">
   <title>{% block title %}Django Auth Tutorial{% endblock %}</title>
   {% if request.user.is_authenticated %}
-    <p><a href="{% url 'home' %}">HOME</a> | <a href="{% url 'logout' %}">LOGOUT</a></p>
+    <p><a href="{% url 'home' %}">HOME</a> |
+        <a href="{% url 'account' %}">ACCOUNT</a> |
+        <a href="{% url 'logout' %}">LOGOUT</a>
+
+    </p>
   {% endif %}
 </head>
 <body>
